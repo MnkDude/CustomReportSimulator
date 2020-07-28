@@ -1,4 +1,5 @@
 /* /*let repList;
+
 let reportID = 0;
 let customGroupNameID = -1;
 let buildNo = 4020;
@@ -105,9 +106,12 @@ function formRequest(method, url, contentType, params) {
 }
 
  */
-function makeRequest() {
+//Click create
+ function makeRequest() {
+    console.log("makeRequest "+i);
     getSubcategDataTableData(document.getElementById("repList")[document.getElementById("repList").selectedIndex].id);
 }
+//Initial start
 getCategoryList();
 function getCategoryList() {
     for (let index = 1; index <= 4; index++) {
@@ -121,7 +125,7 @@ function getCategoryList() {
                 // console.log("hi"+this.responseText);
                 // console.log("responseFormData = " + JSON.stringify(responseFormData));
                 var categoryDataList = responseFormData.categData;
-                console.log(typeof categoryDataList);
+                // console.log(typeof categoryDataList);
                 var selectList = document.getElementById("repList");
                 for (var i = categoryDataList.length - 1; i >= 0; i--) {
                     var option = document.createElement('option');
@@ -138,9 +142,12 @@ function getCategoryList() {
 let i = 0;
 let tableDataListArray = [];
 let customGroupNameID = -1;
+// retrieving reportID, reportnames using module ID
 function getSubcategDataTableData(categID) {
+    console.log("getSubcategDataTableData i"+i);
+    console.log("getSubcategDataTableData customGroupNameID"+customGroupNameID);
     var GetSubcategDataTableData = new XMLHttpRequest();
-    var req = "%7B%22inputParams%22%3A%7B%22tableInputParams%22%3A%7B%22hideTableBottomOptions%22%3Atrue%2C%22sortColumn%22%3A%22UEBA_REPORT_NAME%22%2C%22hideTopDivider%22%3Atrue%2C%22rangeList%22%3A%5B%7B%22value%22%3A25%7D%2C%7B%22value%22%3A50%7D%2C%7B%22value%22%3A75%7D%2C%7B%22value%22%3A100%7D%5D%2C%22showSearchMethod%22%3A%22searchAction%22%2C%22showSearch%22%3Atrue%2C%22sortOrder%22%3A%22ASC%22%2C%22startValue%22%3A1%2C%22rangeValue%22%3A25%2C%22totalCount%22%3A7%2C%22searchData%22%3A%7B%7D%2C%22selectedCategID%22%3A2%7D%2C%22selectedCategID%22%3A%22" + categID + "%22%7D%7D";
+    var req = "%7B%22inputParams%22%3A%7B%22tableInputParams%22%3A%7B%22hideTableBottomOptions%22%3Atrue%2C%22sortColumn%22%3A%22UEBA_REPORT_NAME%22%2C%22hideTopDivider%22%3Atrue%2C%22rangeList%22%3A%5B%7B%22value%22%3A25%7D%2C%7B%22value%22%3A50%7D%2C%7B%22value%22%3A75%7D%2C%7B%22value%22%3A100%7D%5D%2C%22showSearchMethod%22%3A%22searchAction%22%2C%22showSearch%22%3Atrue%2C%22sortOrder%22%3A%22ASC%22%2C%22startValue%22%3A1%2C%22rangeValue%22%3A100%2C%22totalCount%22%3A7%2C%22searchData%22%3A%7B%7D%2C%22selectedCategID%22%3A2%7D%2C%22selectedCategID%22%3A%22" + categID + "%22%7D%7D";
     GetSubcategDataTableData.open("GET", "../../CustomReportSettings.do?methodToCall=getSubcategDataTableData&req=" + req, true);
     GetSubcategDataTableData.setRequestHeader("Content-Type", "application/json;charset=utf-8");
     GetSubcategDataTableData.send();
@@ -153,11 +160,15 @@ function getSubcategDataTableData(categID) {
     }
 }
 
+// retrieving report detail (Userview and/or HostView) for reportID
 function getSubCategDataFromReport() {
     let reportID = tableDataListArray[i].rowId;
     let reportName = tableDataListArray[i].columnValues[1].columnValue;
     let reportGroup = tableDataListArray[i].columnValues[2].columnValue;
     const GetSubCategDataRequest = new XMLHttpRequest();
+    console.log("getSubCategDataFromReport i"+i);
+    console.log("getSubCategDataFromReport customGroupNameID"+customGroupNameID);
+
     GetSubCategDataRequest.open("GET", "../../CustomReportSettings.do?methodToCall=getSubCategDataFromReport&req=%7B%22reportID%22%3A" + reportID + "%7D", true);   // %7B%22reportID%22%3A48%7D
     GetSubCategDataRequest.setRequestHeader("Content-Type", "application/json;charset=utf-8");
     GetSubCategDataRequest.send();
@@ -167,15 +178,15 @@ function getSubCategDataFromReport() {
             let subCategoryListArray = [];
             let columnList = [];
             let myArr = JSON.parse(this.responseText);
-            console.log("myArr.subCategoryData.dropdownList.length " + myArr.subCategoryData.dropdownList.length);
+            // console.log("myArr.subCategoryData.dropdownList.length " + myArr.subCategoryData.dropdownList.length);
             for (let index = 0; index < myArr.subCategoryData.dropdownList.length; index++) {
                 subCategoryListArray.push(myArr.subCategoryData.dropdownList[index].id);
-                console.log("dropdownListID = i" + index + " & " + myArr.subCategoryData.dropdownList[index].id);
-                console.log("subCategoryListArray " + JSON.stringify(subCategoryListArray));
+                // console.log("dropdownListID = i" + index + " & " + myArr.subCategoryData.dropdownList[index].id);
+                // console.log("subCategoryListArray " + JSON.stringify(subCategoryListArray));
             }
             for (let iindex = 0; iindex < myArr.columnTypeData.dropdownList.length; iindex++) {
                 columnList.push(myArr.columnTypeData.dropdownList[iindex].id);
-                console.log("dropdownListID = i" + iindex + " & " + myArr.columnTypeData.dropdownList[iindex].id);
+                // console.log("dropdownListID = i" + iindex + " & " + myArr.columnTypeData.dropdownList[iindex].id);
                 // console.log("subCategoryListArray " + JSON.stringify(columnTypeData));
             }
             i++;
@@ -184,48 +195,52 @@ function getSubCategDataFromReport() {
     };
 }
 
+// saving customreport with all views by retrieving customgroupname ID
 function saveCustomReport(subCategoryListArray, columnList, reportID, reportName, reportGroup) {
     var SaveCustomReportRequest = new XMLHttpRequest();
+    console.log("saveCustomReport i"+i);
+    console.log("saveCustomReport customGroupNameID"+customGroupNameID);  
     if (i == 1) {
-        var GetCustomGroupNameRequest = new XMLHttpRequest();
-        GetCustomGroupNameRequest.open("GET", "../../CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D", true);
-        GetCustomGroupNameRequest.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-        GetCustomGroupNameRequest.send();
-        GetCustomGroupNameRequest.onreadystatechange = function () {
-            if (this.readyState === 4 && this.status === 200) {
-                var myArr = JSON.parse(this.responseText);
-                customGroupNameID = myArr.customGroupData[0].id+1;
-                console.log("afterchange" + customGroupNameID);
-                // getSubCategData();
-            }
-        };
+
     }
 
     SaveCustomReportRequest.open("POST", "../../CustomReportSettings.do?methodToCall=saveCustomReport", true);
     SaveCustomReportRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     console.log(customGroupNameID);
-<<<<<<< HEAD
     console.log("subCategoryData" + JSON.stringify(subCategoryListArray));
     var params = "{\"reportName\":\"4" + reportName + "\",\"addGroupName\":\"3" +
-=======
-
-    console.log("subCategoryData" + JSON.stringify(subCategoryListArray));
-    var params = "{\"reportName\":\"3" + reportName + "\",\"addGroupName\":\"3" +
->>>>>>> a95e40288436dcaaf306d6e2d90c00b58d797103
+        console.log("subCategoryData" + JSON.stringify(subCategoryListArray));
+    var params = "{\"reportName\":\"" + Date.now() + reportName + "\",\"addGroupName\":\"3" +
         repList.options[repList.selectedIndex].innerHTML + "\",\"GroupNameId\":" + customGroupNameID +
-        ",\"description\":\"" + reportGroup + "\",\"viewsData\":\"%5B%7B%5C%22viewId%5C%22%3A1%2C%5C%22viewName%5C%22%3A%5C%22time_15m%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A2%2C%5C%22viewName%5C%22%3A%5C%22time_30m%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A1%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A4%2C%5C%22viewName%5C%22%3A%5C%22time_1hr%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A2%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A6%2C%5C%22viewName%5C%22%3A%5C%22time_2hr%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A3%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A8%2C%5C%22viewName%5C%22%3A%5C%22count_1hr%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A10%2C%5C%22viewName%5C%22%3A%5C%22count_6hr%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A1%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A12%2C%5C%22viewName%5C%22%3A%5C%22count_12hr%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A2%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A14%2C%5C%22viewName%5C%22%3A%5C%22count_24hr%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A3%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A16%2C%5C%22viewName%5C%22%3A%5C%22seas%5C%22%2C%5C%22columnList%5C%22%3A"+ columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Atrue%7D%5D\",\"selectedReportID\":" + reportID + ",\"subCategoryList\":" + JSON.stringify(subCategoryListArray) + ",\"filterList\":[]}";
+        ",\"description\":\"" + reportGroup + "\",\"viewsData\":\"%5B%7B%5C%22viewId%5C%22%3A1%2C%5C%22viewName%5C%22%3A%5C%22time_15m%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A2%2C%5C%22viewName%5C%22%3A%5C%22time_30m%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A1%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A4%2C%5C%22viewName%5C%22%3A%5C%22time_1hr%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A2%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A6%2C%5C%22viewName%5C%22%3A%5C%22time_2hr%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A3%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A8%2C%5C%22viewName%5C%22%3A%5C%22count_1hr%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A10%2C%5C%22viewName%5C%22%3A%5C%22count_6hr%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A1%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A12%2C%5C%22viewName%5C%22%3A%5C%22count_12hr%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A2%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A14%2C%5C%22viewName%5C%22%3A%5C%22count_24hr%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A3%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22%3A16%2C%5C%22viewName%5C%22%3A%5C%22seas%5C%22%2C%5C%22columnList%5C%22%3A" + columnList + "%2C%5C%22anomalyType%5C%22%3A1%2C%5C%22frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Atrue%7D%5D\",\"selectedReportID\":" + reportID + ",\"subCategoryList\":" + JSON.stringify(subCategoryListArray) + ",\"filterList\":[]}";
     params = "req=" + params + "&";
     var uebacsrf = document.cookie.split('uebacsrf=')[1];
     params = params + "ueba_csrf=" + uebacsrf + "&uebacsrf=" + uebacsrf;
     SaveCustomReportRequest.send(params);
     SaveCustomReportRequest.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
+            //looping through reportID 
             if (i < tableDataListArray.length) {
-                getSubCategDataFromReport();
+                var GetCustomGroupNameRequest = new XMLHttpRequest();
+                GetCustomGroupNameRequest.open("GET", "../../CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D", true);
+                GetCustomGroupNameRequest.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+                GetCustomGroupNameRequest.send();
+                GetCustomGroupNameRequest.onreadystatechange = function () {
+                    if (this.readyState === 4 && this.status === 200) {
+                        var myArr = JSON.parse(this.responseText);
+                        customGroupNameID = myArr.customGroupData[0].id;
+                        console.log("afterchange" + customGroupNameID);
+                        // getSubCategData();
+                        console.log("saveCustomReport insideIF i"+i);
+                        console.log("saveCustomReport insideIF customGroupNameID"+customGroupNameID);
+                        getSubCategDataFromReport();
+                    }
+                };
             }
             else {
-                i=0;
-                customGroupNameID=-1;
+                // saving report finished setting default value to save next reports
+                i = 0;
+                customGroupNameID = -1;
                 tableDataListArray = [];
             }
         }
