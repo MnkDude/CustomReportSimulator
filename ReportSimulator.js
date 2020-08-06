@@ -1,17 +1,28 @@
 let repListSelectedIndex = 0;
 function makeRequest() {
-    repListSelectedIndex=document.getElementById("repList")[document.getElementById("repList").selectedIndex];
+    repListSelectedIndex = document.getElementById("repList")[document.getElementById("repList").selectedIndex];
     getSubcategDataTableData(repListSelectedIndex.id);
+}
+
+function getRequestObject(method, request, params) {
+    var RequestObject = new XMLHttpRequest();
+    RequestObject.open(method, request, true);
+    if (method == "POST") {
+        RequestObject.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        RequestObject.send(params);
+    }
+    else {
+        RequestObject.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+        RequestObject.send();
+    }
+    return RequestObject;
 }
 
 //Initial start
 getCategoryList();
 function getCategoryList() {
     for (let index = 1; index <= 4; index++) {
-        var GetCategoryList = new XMLHttpRequest();
-        GetCategoryList.open("GET", "../../CustomReportSettings.do?methodToCall=getCategoryList&req=%7B%22moduleID%22%3A%22" + index + "%22%7D", true);
-        GetCategoryList.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-        GetCategoryList.send();
+        var GetCategoryList = getRequestObject("GET", "../../CustomReportSettings.do?methodToCall=getCategoryList&req=%7B%22moduleID%22%3A%22" + index + "%22%7D");
         GetCategoryList.onreadystatechange = function () {
             if (this.readyState === 4 && this.status === 200) {
                 var responseFormData = JSON.parse(this.responseText);
@@ -35,11 +46,8 @@ let customGroupNameID = -1;
 
 // retrieving reportID, reportnames using module ID
 function getSubcategDataTableData(categID) {
-    var GetSubcategDataTableData = new XMLHttpRequest();
     var req = "%7B%22inputParams%22%3A%7B%22tableInputParams%22%3A%7B%22hideTableBottomOptions%22%3Atrue%2C%22sortColumn%22%3A%22UEBA_REPORT_NAME%22%2C%22hideTopDivider%22%3Atrue%2C%22rangeList%22%3A%5B%7B%22value%22%3A25%7D%2C%7B%22value%22%3A50%7D%2C%7B%22value%22%3A75%7D%2C%7B%22value%22%3A100%7D%5D%2C%22showSearchMethod%22%3A%22searchAction%22%2C%22showSearch%22%3Atrue%2C%22sortOrder%22%3A%22ASC%22%2C%22startValue%22%3A1%2C%22rangeValue%22%3A100%2C%22totalCount%22%3A7%2C%22searchData%22%3A%7B%7D%2C%22selectedCategID%22%3A2%7D%2C%22selectedCategID%22%3A%22" + categID + "%22%7D%7D";
-    GetSubcategDataTableData.open("GET", "../../CustomReportSettings.do?methodToCall=getSubcategDataTableData&req=" + req, true);
-    GetSubcategDataTableData.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-    GetSubcategDataTableData.send();
+    var GetSubcategDataTableData = getRequestObject("GET", "../../CustomReportSettings.do?methodToCall=getSubcategDataTableData&req=" + req);
     GetSubcategDataTableData.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             responseData = JSON.parse(this.responseText);
@@ -54,13 +62,9 @@ function getSubCategDataFromReport() {
     let reportID = tableDataListArray[i].rowId;
     let reportName = tableDataListArray[i].columnValues[1].columnValue;
     let reportGroup = tableDataListArray[i].columnValues[2].columnValue;
-    const GetSubCategDataRequest = new XMLHttpRequest();
-    GetSubCategDataRequest.open("GET", "../../CustomReportSettings.do?methodToCall=getSubCategDataFromReport&req=%7B%22reportID%22%3A" + reportID + "%7D", true);   // %7B%22reportID%22%3A48%7D
-    GetSubCategDataRequest.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-    GetSubCategDataRequest.send();
+    const GetSubCategDataRequest = getRequestObject("GET", "../../CustomReportSettings.do?methodToCall=getSubCategDataFromReport&req=%7B%22reportID%22%3A" + reportID + "%7D");
     GetSubCategDataRequest.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            const repList = document.getElementById("repList");
             let subCategoryListArray = [];
             let columnList = [];
             let myArr = JSON.parse(this.responseText);
@@ -86,13 +90,6 @@ let nodeObject = {};
 
 // saving customreport with all views by retrieving customgroupname ID
 function saveCustomReport(subCategoryListArray, columnList, reportID, reportName, reportGroup, patternViewObject, patternPresent) {
-    var SaveCustomReportRequest = new XMLHttpRequest();
-    console.log("saveCustomReport i" + i);
-    console.log("saveCustomReport customGroupNameID" + customGroupNameID);
-    SaveCustomReportRequest.open("POST", "../../CustomReportSettings.do?methodToCall=saveCustomReport", true);
-    SaveCustomReportRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    console.log(customGroupNameID);
-    console.log("subCategoryData" + JSON.stringify(subCategoryListArray));
     var params = "{\"reportName\":\"" + Date.now() + reportName + "\",\"addGroupName\":\"3" +
         repList.options[repList.selectedIndex].innerHTML + "\",\"GroupNameId\":" + customGroupNameID +
         ",\"description\":\"" + reportGroup + "\",\"viewsData\":\"\
@@ -123,7 +120,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
     params = "req=" + params + "&";
     var uebacsrf = document.cookie.split('uebacsrf=')[1];
     params = params + "ueba_csrf=" + uebacsrf + "&uebacsrf=" + uebacsrf;
-    SaveCustomReportRequest.send(params);
+    var SaveCustomReportRequest = getRequestObject("POST", "../../CustomReportSettings.do?methodToCall=saveCustomReport", params);
     SaveCustomReportRequest.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             let nodeText = repListSelectedIndex.value + " | " + reportGroup + " | " + reportName + " : " + this.responseText;
@@ -132,10 +129,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
             list.appendChild(entry);
             //looping through reportID 
             if (i < tableDataListArray.length) {
-                var GetCustomGroupNameRequest = new XMLHttpRequest();
-                GetCustomGroupNameRequest.open("GET", "../../CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D", true);
-                GetCustomGroupNameRequest.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-                GetCustomGroupNameRequest.send();
+                var GetCustomGroupNameRequest = getRequestObject("GET", "../../CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D");
                 GetCustomGroupNameRequest.onreadystatechange = function () {
                     if (this.readyState === 4 && this.status === 200) {
                         var myArr = JSON.parse(this.responseText);
@@ -186,15 +180,13 @@ function retrievePatternFields(reportID, reportName, reportGroup, patternData, p
         list.appendChild(entry);
     }
     if (i < tableDataListArray.length) {
-        var GetCustomGroupNameRequest = new XMLHttpRequest();
-        GetCustomGroupNameRequest.open("GET", "../../CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D", true);
-        GetCustomGroupNameRequest.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-        GetCustomGroupNameRequest.send();
+        var GetCustomGroupNameRequest = getRequestObject("GET", "../../CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D");
         GetCustomGroupNameRequest.onreadystatechange = function () {
             if (this.readyState === 4 && this.status === 200) {
                 var myArr = JSON.parse(this.responseText);
                 customGroupNameID = myArr.customGroupData[0].id;
-                 getSubCategDataFromReport();
+                // getSubCategData();
+                getSubCategDataFromReport();
             }
         };
     }
@@ -206,7 +198,7 @@ function retrievePatternFields(reportID, reportName, reportGroup, patternData, p
         nodeObject = {};
         makeRequest();
     }
- }
+}
 
 function makePatternView(patternArray, reportID) {
     let pamModulePatterns = { "95": [[9, 26, 10, 45, 12], [9, 26, 12, 45, 10]], "96": [[9, 26, 12, 45, 10], [9, 26, 10, 45, 12]] };
