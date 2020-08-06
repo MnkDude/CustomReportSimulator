@@ -3,9 +3,10 @@
 <head>
     <title>CusRepp</title>
     <script type="text/javascript">
+    var start=1411,end=1620;
 
         //    let params = "ueba_csrf=" + uebacsrf + "&uebacsrf=" + uebacsrf;
-        for (let i = 762; i <= 786; i++) {
+        for (let i = start; i <= end; i++) {
             let SaveCustomReportRequest = new XMLHttpRequest();
             SaveCustomReportRequest.open("POST", "../../CustomReportSettings.do?methodToCall=deleteCustomReport", true);
             SaveCustomReportRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
