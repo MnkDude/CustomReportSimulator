@@ -136,7 +136,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
             }
             params = params + "%5D\",\"selectedReportID\":" + reportID + ",\"subCategoryList\":" + JSON.stringify(subCategoryListArray) + ",\"filterList\":[]}";
             params = "req=" + params + "&";
-            let uebacsrf = document.cookie.split('uebacsrf=')[1];
+            let uebacsrf = document.cookie.split('uebacsrf=')[1].split(";")[0];
             params = params + "ueba_csrf=" + uebacsrf + "&uebacsrf=" + uebacsrf;
             let SaveCustomReportRequest = getRequestObject("POST", "/CustomReportSettings.do?methodToCall=saveCustomReport", params);
             SaveCustomReportRequest.onreadystatechange = function () {
