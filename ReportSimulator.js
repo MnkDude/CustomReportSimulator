@@ -2,6 +2,7 @@ let repListSelectedIndex = 0;
 let dropdownLength = 0;
 let selDropDownValue = 0;
 function makeRequest() {
+    reportGroupNamePrefix = Date.now();
     repListSelectedIndex = document.getElementById("repList")[document.getElementById("repList").selectedIndex];
     getSubcategDataTableData(repListSelectedIndex.id);
     // dropdownLength = document.getElementById('repList').length;
@@ -92,10 +93,12 @@ function getSubCategDataFromReport() {
         }
     };
 }
+let reportGroupNamePrefix = 0;
 
 // saving customreport with all views by retrieving customgroupname ID
 function saveCustomReport(subCategoryListArray, columnList, reportID, reportName, reportGroup, patternViewObject, patternPresent) {
-    let params = "{\"reportName\":\"" + Date.now() + reportName + "\",\"addGroupName\":\"3" +
+    let reportNamePrefix = Date.now();
+    let params = "{\"reportName\":\"" + reportNamePrefix + reportName + "\",\"addGroupName\":\"" + reportGroupNamePrefix +
         repList.options[repList.selectedIndex].innerHTML + "\",\"GroupNameId\":" + customGroupNameID +
         ",\"description\":\"" + reportGroup + "\",\"viewsData\":\"\
 %5B%7B%5C%22viewId%5C%22%3A1%2C%5C%22viewName%5C%22%3A%5C%22time_15m%5C%22%2C%5C%22columnList%5C%22%3A\
