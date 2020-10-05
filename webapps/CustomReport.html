@@ -251,11 +251,13 @@
         let list = document.getElementById('demo');
 
 
-        // saving customreport with all views by retrieving customgroupname ID
+        // saving customreport with all views by retrieving groupname ID
         function saveCustomReport(subCategoryListArray, columnList, reportID, reportName, reportGroup, patternViewObject, patternPresent) {
-            let reportNamePrefix = Date.now();
-            let params = "{\"reportName\":\"" + reportNamePrefix + reportName + "\",\"addGroupName\":\"" + reportGroupNamePrefix +
-                repList.options[repList.selectedIndex].innerHTML + "\",\"GroupNameId\":" + customGroupNameID +
+            let reportNamePrefix = Date.now().toString().substring(6);
+            reportName=(reportNamePrefix+reportName).substring(0,49);
+            let customGroupName=repList.options[repList.selectedIndex].innerHTML.replace(/[\(\)]/g,"");
+            let params = "{\"reportName\":\"" + reportName + "\",\"addGroupName\":\"" + reportGroupNamePrefix +
+                customGroupName + "\",\"GroupNameId\":" + customGroupNameID +
                 ",\"description\":\"" + reportGroup + "\",\"viewsData\":\"\
 %5B%7B%5C%22viewId%5C%22%3A1%2C%5C%22viewName%5C%22%3A%5C%22time_15m%5C%22%2C%5C%22columnList%5C%22%3A\
 " + columnList + "%2C%5C%22anomalyType%5C%22%3A0%2C%5C%22frequency%5C%22%3A0%2C%5C%22seasonality%5C%22\
