@@ -43,13 +43,17 @@
         }
        
         let result_print;
+        let tableDataListArrayDuplicate=[];
         function makeRequest() {
             reportGroupNamePrefix = Date.now();
             repListSelectedIndex = document.getElementById("repList")[document.getElementById("repList").selectedIndex];
             let checked_reports = document.querySelectorAll('.reportcheck');
             for (let i = 0; i < checked_reports.length; i++) {
-                if (!checked_reports[i].checked) {
-                    tableDataListArray.splice(i, 1);
+                if (checked_reports[i].checked) {
+                    // tableDataListArray.splice(i, 1);
+                    tableDataListArrayDuplicate.push(tableDataListArray[i]);
+                    console.log(tableDataListArray);
+
                 }
             }
             console.log(tableDataListArray);
@@ -116,9 +120,9 @@
 
         // retrieving report detail (Userview and/or HostView, actions) for reportID
         function getSubCategDataFromReport() {
-            let reportID = tableDataListArray[i].rowId;
-            let reportName = tableDataListArray[i].columnValues[1].columnValue;
-            let reportGroup = tableDataListArray[i].columnValues[2].columnValue;
+            let reportID = tableDataListArrayDuplicate[i].rowId;
+            let reportName = tableDataListArrayDuplicate[i].columnValues[1].columnValue;
+            let reportGroup = tableDataListArrayDuplicate[i].columnValues[2].columnValue;
             const GetSubCategDataRequest = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getSubCategDataFromReport&req=%7B%22reportID%22%3A" + reportID + "%7D");
             GetSubCategDataRequest.onreadystatechange = function () {
                 if (this.readyState === 4 && this.status === 200) {
@@ -333,7 +337,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
                     entry.appendChild(document.createTextNode(nodeText));
                     result_print.appendChild(entry);
                     //looping through reportID 
-                    if (i < tableDataListArray.length) {
+                    if (i < tableDataListArrayDuplicate.length) {
                         let GetCustomGroupNameRequest = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D");
                         GetCustomGroupNameRequest.onreadystatechange = function () {
                             if (this.readyState === 4 && this.status === 200) {
@@ -349,6 +353,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
                         i = 0;
                         customGroupNameID = -1;
                         tableDataListArray = [];
+                        tableDataListArrayDuplicate=[];
                     }
                 }
             };
