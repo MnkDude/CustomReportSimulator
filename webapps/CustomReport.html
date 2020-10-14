@@ -6,40 +6,58 @@
 
 <body>
     <label for="repList">Select Report Group</label>
-    <select id="repList">
+    <select id="repList" onchange="getSubcategDataTableData(this.options[this.selectedIndex].id)">
     </select>
-    <input type="button" value="Create" onclick="makeRequest()" />
+    <input type="button" value="Create" onclick="makeRequest()" /></br>
     <b><label id="result"></label></b>
-    <ol id="demo">
-    </ol>
+   
     <script>
         let repListSelectedIndex = 0;
         let dropdownLength = 0;
         let selDropDownValue = 0;
+
         //Initial start getCategoryList to get Report Categories
-        (function () {
-            for (let index = 1; index <= 4; index++) {
-                let GetCategoryList = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getCategoryList&req=%7B%22moduleID%22%3A%22" + index + "%22%7D");
-                GetCategoryList.onreadystatechange = function () {
-                    if (this.readyState === 4 && this.status === 200) {
-                        let responseFormData = JSON.parse(this.responseText);
-                        let categoryDataList = responseFormData.categData;
-                        let selectList = document.getElementById("repList");
-                        for (let i = categoryDataList.length - 1; i >= 0; i--) {
-                            let option = document.createElement('option');
-                            option.text = option.value = categoryDataList[i].value;
-                            option.id = categoryDataList[i].id;
-                            selectList.add(option, 0);
-                        }
-                        selectList.selectedIndex = 0;
+        initStart(4);
+        function initStart(index) {
+            let GetCategoryList = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getCategoryList&req=%7B%22moduleID%22%3A%22" + index + "%22%7D");
+            GetCategoryList.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    let responseFormData = JSON.parse(this.responseText);
+                    let categoryDataList = responseFormData.categData;
+                    let selectList = document.getElementById("repList");
+                    for (let i = categoryDataList.length - 1; i >= 0; i--) {
+                        let option = document.createElement('option');
+                        option.text = option.value = categoryDataList[i].value;
+                        option.id = categoryDataList[i].id;
+                        selectList.add(option, 0);
                     }
-                };
-            }
-        })();
+                    if (index >= 2) initStart(index - 1);
+                    else {
+                        selectList.selectedIndex = 0;
+                        console.log("executed " + document.getElementById("repList")[0].id);
+                        getSubcategDataTableData(document.getElementById("repList")[0].id);
+                    }
+                }
+            };
+
+        }
+       
+        let result_print;
         function makeRequest() {
             reportGroupNamePrefix = Date.now();
             repListSelectedIndex = document.getElementById("repList")[document.getElementById("repList").selectedIndex];
-            getSubcategDataTableData(repListSelectedIndex.id);
+            let checked_reports = document.querySelectorAll('.reportcheck');
+            for (let i = 0; i < checked_reports.length; i++) {
+                if (!checked_reports[i].checked) {
+                    tableDataListArray.splice(i, 1);
+                }
+            }
+            console.log(tableDataListArray);
+            document.querySelectorAll('label[id="lb' + previousSelected + '"]').forEach(o => o.remove());
+            getSubCategDataFromReport();
+            result_print = document.createElement("ol");
+            result_print.setAttribute("id", "demo");
+            document.body.appendChild(result_print);
         }
 
         function getRequestObject(method, request, params) {
@@ -56,21 +74,42 @@
             return RequestObject;
         }
 
-        
+
 
         let i = 0;
         let tableDataListArray = [];
         let customGroupNameID = -1;
+        let previousSelected;
 
         // retrieving reportID, reportnames using module ID
         function getSubcategDataTableData(categID) {
+            if(result_print!=null)result_print.remove();
+
             let req = "%7B%22inputParams%22%3A%7B%22tableInputParams%22%3A%7B%22hideTableBottomOptions%22%3Atrue%2C%22sortColumn%22%3A%22UEBA_REPORT_NAME%22%2C%22hideTopDivider%22%3Atrue%2C%22rangeList%22%3A%5B%7B%22value%22%3A25%7D%2C%7B%22value%22%3A50%7D%2C%7B%22value%22%3A75%7D%2C%7B%22value%22%3A100%7D%5D%2C%22showSearchMethod%22%3A%22searchAction%22%2C%22showSearch%22%3Atrue%2C%22sortOrder%22%3A%22ASC%22%2C%22startValue%22%3A1%2C%22rangeValue%22%3A100%2C%22totalCount%22%3A7%2C%22searchData%22%3A%7B%7D%2C%22selectedCategID%22%3A2%7D%2C%22selectedCategID%22%3A%22" + categID + "%22%7D%7D";
             let GetSubcategDataTableData = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getSubcategDataTableData&req=" + req);
             GetSubcategDataTableData.onreadystatechange = function () {
                 if (this.readyState === 4 && this.status === 200) {
                     responseData = JSON.parse(this.responseText);
                     tableDataListArray = responseData.tableDataList;
-                    getSubCategDataFromReport();
+                    document.querySelectorAll('label[id="lb' + previousSelected + '"]').forEach(o => o.remove());
+
+                    tableDataListArray.map(o => {
+                        let name = document.createElement("label");
+                        name.setAttribute("id", "lb" + categID);
+                        let report = document.createElement("INPUT");
+                        report.setAttribute("type", "checkbox");
+                        report.setAttribute("class", "reportcheck");
+                        report.setAttribute("id", "cb" + categID);
+                        report.setAttribute("value", o.rowId);
+                        report.setAttribute("checked", true);
+                        name.appendChild(report);
+                        name.appendChild(document.createTextNode(o.columnValues[2].columnValue + " - " + o.columnValues[1].columnValue));
+                        name.appendChild(document.createElement("BR"));
+                        document.body.appendChild(name);
+                    })
+                    previousSelected = document.getElementById("repList")[document.getElementById("repList").selectedIndex].id;
+
+
                 }
             }
         }
@@ -91,11 +130,11 @@
                     // for (let index = 0; index < myArr.subCategoryData.dropdownList.length; index++) {
                     //     subCategoryListArray.push(myArr.subCategoryData.dropdownList[index].id);
                     // }
-                    subCategoryListArray=myArr.subCategoryData.dropdownList.map(obj=>obj.id);
+                    subCategoryListArray = myArr.subCategoryData.dropdownList.map(obj => obj.id);
                     // for (let iindex = 0; iindex < myArr.columnTypeData.dropdownList.length; iindex++) {
                     //     columnList.push(myArr.columnTypeData.dropdownList[iindex].id);
                     // }
-                    columnList=myArr.columnTypeData.dropdownList.map(obj=>obj.id);
+                    columnList = myArr.columnTypeData.dropdownList.map(obj => obj.id);
                     i++;
                     let patternViewObject = {};
                     if (patternPresent) {
@@ -219,7 +258,7 @@
             viewObject['frequency'] = 0;
             viewObject['seasonality'] = false;
             let columnListArray = [];
-            for (let i = 1; i <= patternModel[reportID].length; i++) { 
+            for (let i = 1; i <= patternModel[reportID].length; i++) {
                 columnObject = {};
                 columnObject['id'] = i;
                 let innerColumnListArray = [];
@@ -254,8 +293,8 @@
         // saving customreport with all views by retrieving groupname ID
         function saveCustomReport(subCategoryListArray, columnList, reportID, reportName, reportGroup, patternViewObject, patternPresent) {
             let reportNamePrefix = Date.now().toString().substring(6);
-            reportName=(reportNamePrefix+reportName).substring(0,49);
-            let customGroupName=repList.options[repList.selectedIndex].innerHTML.replace(/[\(\)]/g,"");
+            reportName = (reportNamePrefix + reportName).substring(0, 49);
+            let customGroupName = repList.options[repList.selectedIndex].innerHTML.replace(/[\(\)]/g, "");
             let params = "{\"reportName\":\"" + reportName + "\",\"addGroupName\":\"" + reportGroupNamePrefix +
                 customGroupName + "\",\"GroupNameId\":" + customGroupNameID +
                 ",\"description\":\"" + reportGroup + "\",\"viewsData\":\"\
@@ -292,7 +331,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
                     let nodeText = repListSelectedIndex.value + " | " + reportGroup + " | " + reportName + " : " + this.responseText;
                     let entry = document.createElement('li');
                     entry.appendChild(document.createTextNode(nodeText));
-                    list.appendChild(entry);
+                    result_print.appendChild(entry);
                     //looping through reportID 
                     if (i < tableDataListArray.length) {
                         let GetCustomGroupNameRequest = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D");
@@ -319,9 +358,9 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
 
 
         }
-        
 
-        
+
+
     </script>
 
 </body>
