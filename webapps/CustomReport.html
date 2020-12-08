@@ -10,16 +10,17 @@
     </select>
     <input type="button" value="Create" onclick="makeRequest()" /></br>
     <b><label id="result"></label></b>
-   
+
     <script>
         let repListSelectedIndex = 0;
         let dropdownLength = 0;
         let selDropDownValue = 0;
 
+
         //Initial start getCategoryList to get Report Categories
         initStart(4);
         function initStart(index) {
-            let GetCategoryList = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getCategoryList&req=%7B%22moduleID%22%3A%22" + index + "%22%7D");
+            let GetCategoryList = getRequestObject("GET", "/RestAPI/WC/CustomReports?mTCall=getCategoryList&req=%7B%22moduleID%22%3A%22" + index + "%22%7D");
             GetCategoryList.onreadystatechange = function () {
                 if (this.readyState === 4 && this.status === 200) {
                     let responseFormData = JSON.parse(this.responseText);
@@ -34,29 +35,24 @@
                     if (index >= 2) initStart(index - 1);
                     else {
                         selectList.selectedIndex = 0;
-                        console.log("executed " + document.getElementById("repList")[0].id);
                         getSubcategDataTableData(document.getElementById("repList")[0].id);
                     }
                 }
             };
 
         }
-       
+
         let result_print;
-        let tableDataListArrayDuplicate=[];
+        let tableDataListArrayDuplicate = [];
         function makeRequest() {
             reportGroupNamePrefix = Date.now();
             repListSelectedIndex = document.getElementById("repList")[document.getElementById("repList").selectedIndex];
             let checked_reports = document.querySelectorAll('.reportcheck');
             for (let i = 0; i < checked_reports.length; i++) {
                 if (checked_reports[i].checked) {
-                    // tableDataListArray.splice(i, 1);
                     tableDataListArrayDuplicate.push(tableDataListArray[i]);
-                    console.log(tableDataListArray);
-
                 }
             }
-            console.log(tableDataListArray);
             document.querySelectorAll('label[id="lb' + previousSelected + '"]').forEach(o => o.remove());
             getSubCategDataFromReport();
             result_print = document.createElement("ol");
@@ -87,10 +83,10 @@
 
         // retrieving reportID, reportnames using module ID
         function getSubcategDataTableData(categID) {
-            if(result_print!=null)result_print.remove();
+            if (result_print != null) result_print.remove();
 
             let req = "%7B%22inputParams%22%3A%7B%22tableInputParams%22%3A%7B%22hideTableBottomOptions%22%3Atrue%2C%22sortColumn%22%3A%22UEBA_REPORT_NAME%22%2C%22hideTopDivider%22%3Atrue%2C%22rangeList%22%3A%5B%7B%22value%22%3A25%7D%2C%7B%22value%22%3A50%7D%2C%7B%22value%22%3A75%7D%2C%7B%22value%22%3A100%7D%5D%2C%22showSearchMethod%22%3A%22searchAction%22%2C%22showSearch%22%3Atrue%2C%22sortOrder%22%3A%22ASC%22%2C%22startValue%22%3A1%2C%22rangeValue%22%3A100%2C%22totalCount%22%3A7%2C%22searchData%22%3A%7B%7D%2C%22selectedCategID%22%3A2%7D%2C%22selectedCategID%22%3A%22" + categID + "%22%7D%7D";
-            let GetSubcategDataTableData = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getSubcategDataTableData&req=" + req);
+            let GetSubcategDataTableData = getRequestObject("GET", "/RestAPI/WC/CustomReports?mTCall=getSubcategDataTableData&req=" + req);
             GetSubcategDataTableData.onreadystatechange = function () {
                 if (this.readyState === 4 && this.status === 200) {
                     responseData = JSON.parse(this.responseText);
@@ -123,7 +119,7 @@
             let reportID = tableDataListArrayDuplicate[i].rowId;
             let reportName = tableDataListArrayDuplicate[i].columnValues[1].columnValue;
             let reportGroup = tableDataListArrayDuplicate[i].columnValues[2].columnValue;
-            const GetSubCategDataRequest = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getSubCategDataFromReport&req=%7B%22reportID%22%3A" + reportID + "%7D");
+            const GetSubCategDataRequest = getRequestObject("GET", "/RestAPI/WC/CustomReports?mTCall=getSubCategDataFromReport&req=%7B%22reportID%22%3A" + reportID + "%7D");
             GetSubCategDataRequest.onreadystatechange = function () {
                 if (this.readyState === 4 && this.status === 200) {
                     let subCategoryListArray = [];
@@ -138,21 +134,23 @@
                     // for (let iindex = 0; iindex < myArr.columnTypeData.dropdownList.length; iindex++) {
                     //     columnList.push(myArr.columnTypeData.dropdownList[iindex].id);
                     // }
-                    columnList = myArr.columnTypeData.dropdownList.map(obj => obj.id);                
-                    
-                    
-                        i++;
+                    columnList = myArr.columnTypeData.dropdownList.map(obj => obj.id);
+                    i++;
                     let patternViewObject = {};
+                    let patternViewObjectWithTime = {};
+
                     if (patternPresent) {
-                        patternViewObject = makePatternView(patternData, reportID, retrievePatternFields(reportID, patternData));
+                        patternViewObject = makePatternView(patternData, reportID, retrievePatternFields(reportID, patternData, false), false);
+                        patternViewObjectWithTime = makePatternView(patternData, reportID, retrievePatternFields(reportID, patternData, true), true);
                     }
-                    saveCustomReport(subCategoryListArray, JSON.stringify(columnList), reportID, reportName, reportGroup, patternViewObject, patternPresent);
+                    saveCustomReport(subCategoryListArray, JSON.stringify(columnList), reportID, reportName, reportGroup, patternViewObject, patternViewObjectWithTime, patternPresent);
                 }
             };
         }
-        let nodeObject = {};
 
-        function retrievePatternFields(reportID, patternData) {
+        function retrievePatternFields(reportID, patternData, isTimePresent) {
+            let nodeObject = {};
+            let nodeObjectOfTime = {};
             let nodeText = document.getElementById("repList")[document.getElementById("repList").selectedIndex].value;
             let selectReportGroup = document.getElementById("repList")[document.getElementById("repList").selectedIndex].id;
             if (patternData.length > 0) {
@@ -162,6 +160,7 @@
 
                 }
                 nodeObject[reportID] = []; //baseArray
+                nodeObjectOfTime[reportID] = [];
                 if (selectReportGroup == 8) {
                     let index = nodeArray.indexOf(9);
                     let index1 = nodeArray.indexOf(10);
@@ -175,10 +174,7 @@
                     let index2 = temp.indexOf(12);
                     temp[index] = 12;
                     temp[index2] = 10;
-                    console.log(temp);
-
                     nodeObject[reportID][nodeObject[reportID].length] = temp;
-
                 }
                 if (nodeObject[reportID][0].length > 1 && nodeObject[reportID][0].includes(9)) {
                     let temp = [...nodeObject[reportID][0]];
@@ -252,14 +248,36 @@
                     }
                 }
             }
-            return nodeObject;
+            if (isTimePresent) {
+                for (let index in nodeObject[reportID]) {
+                    if (nodeObject[reportID][index].includes(9)) {
+                        nodeObjectOfTime[reportID].push(nodeObject[reportID][index]);
+                    }
+                }
+                return nodeObjectOfTime;
+            }
+            else {
+                let newNodeObject = {};
+                newNodeObject[reportID] = [];
+                for (let index in nodeObject[reportID]) {
+                    if (!nodeObject[reportID][index].includes(9)) {
+                        newNodeObject[reportID].push(nodeObject[reportID][index]);
+                    }
+                }
+                return newNodeObject;
+            }
         }
 
-        function makePatternView(patternArray, reportID, patternModel) {
-            let pamModulePatterns = { "95": [[9, 26, 10, 45, 12], [9, 26, 12, 45, 10]], "96": [[9, 26, 12, 45, 10], [9, 26, 10, 45, 12]] };
+        function makePatternView(patternArray, reportID, patternModel, isTimePresent) {
             let viewObject = {};
-            viewObject['viewId'] = 18;
-            viewObject['viewName'] = 'PatterView';
+            if (isTimePresent) {
+                viewObject['viewId'] = 20;
+                viewObject['viewName'] = 'PatterWithTime';
+            }
+            else {
+                viewObject['viewId'] = 18;
+                viewObject['viewName'] = 'PatterView';
+            }
             viewObject['anomalyType'] = 2;
             viewObject['frequency'] = 0;
             viewObject['seasonality'] = false;
@@ -297,7 +315,7 @@
 
 
         // saving customreport with all views by retrieving groupname ID
-        function saveCustomReport(subCategoryListArray, columnList, reportID, reportName, reportGroup, patternViewObject, patternPresent) {
+        function saveCustomReport(subCategoryListArray, columnList, reportID, reportName, reportGroup, patternViewObject, patternViewObjectWithTime, patternPresent) {
             let reportNamePrefix = Date.now().toString().substring(6);
             reportName = (reportNamePrefix + reportName).substring(0, 49);
             let customGroupName = repList.options[repList.selectedIndex].innerHTML.replace(/[\(\)]/g, "");
@@ -326,12 +344,13 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
 %5C%22%3Atrue%7D";
             if (patternPresent) {
                 params = params + "%2C" + JSON.stringify(patternViewObject).replace(/"/g, "\\\"");
+                params = params + "%2C" + JSON.stringify(patternViewObjectWithTime).replace(/"/g, "\\\"");
             }
             params = params + "%5D\",\"selectedReportID\":" + reportID + ",\"subCategoryList\":" + JSON.stringify(subCategoryListArray) + ",\"filterList\":[]}";
             params = "req=" + params + "&";
             let uebacsrf = document.cookie.split('uebacsrf=')[1].split(";")[0];
             params = params + "ueba_csrf=" + uebacsrf + "&uebacsrf=" + uebacsrf;
-            let SaveCustomReportRequest = getRequestObject("POST", "/CustomReportSettings.do?methodToCall=saveCustomReport", params);
+            let SaveCustomReportRequest = getRequestObject("POST", "/RestAPI/WC/CustomReports?mTCall=saveCustomReport", params);
             SaveCustomReportRequest.onreadystatechange = function () {
                 if (this.readyState === 4 && this.status === 200) {
                     let nodeText = repListSelectedIndex.value + " | " + reportGroup + " | " + reportName + " : " + this.responseText;
@@ -340,7 +359,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
                     result_print.appendChild(entry);
                     //looping through reportID 
                     if (i < tableDataListArrayDuplicate.length) {
-                        let GetCustomGroupNameRequest = getRequestObject("GET", "/CustomReportSettings.do?methodToCall=getCustomReportsFormData&req=%7B%7D");
+                        let GetCustomGroupNameRequest = getRequestObject("GET", "/RestAPI/WC/CustomReports?mTCall=getCustomReportsFormData&req=%7B%7D");
                         GetCustomGroupNameRequest.onreadystatechange = function () {
                             if (this.readyState === 4 && this.status === 200) {
                                 let myArr = JSON.parse(this.responseText);
@@ -355,7 +374,7 @@ frequency%5C%22%3A0%2C%5C%22seasonality%5C%22%3Afalse%7D%2C%7B%5C%22viewId%5C%22
                         i = 0;
                         customGroupNameID = -1;
                         tableDataListArray = [];
-                        tableDataListArrayDuplicate=[];
+                        tableDataListArrayDuplicate = [];
                     }
                 }
             };
