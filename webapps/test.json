@@ -1,0 +1,163 @@
+{
+    "reportName": "mnmnnmn",
+    "addGroupName": "3Google",
+    "GroupNameId": 342,
+    "description": "",
+    "viewsData": "[]",
+    "selectedReportID": 44,
+    "subCategoryList": [
+        88,
+        89
+    ],
+    "filterList": []
+
+
+
+{
+        "viewId": 5,
+        "viewName": "mypat",
+        "columnList": [
+            {
+                "id": 1,
+                "columnList": [
+                    {
+                        "id": 10,
+                        "value": "Host Name"
+                    },
+                    {
+                        "id": 12,
+                        "value": "Username"
+                    },
+                    {
+                        "id": 26,
+                        "value": "Domain"
+                    }
+                ],
+                "columnListLength": 2
+            }
+        ]
+            {
+            "id": 2,
+            "columnList": [
+                {
+                    "id": "10",
+                    "value": "Host Name"
+                },
+                {
+                    "id": "26",
+                    "value": "Domain"
+                },
+                {
+                    "id": "12",
+                    "value": "Username"
+                }
+            ],
+            "columnListLength": 2,
+            "marginTop": true
+        },
+        {
+            "id": 3,
+            "columnList": [
+                {
+                    "id": "12",
+                    "value": "Username"
+                },
+                {
+                    "id": "10",
+                    "value": "Host Name"
+                },
+                {
+                    "id": "26",
+                    "value": "Domain"
+                }
+            ],
+            "columnListLength": 2,
+            "marginTop": true
+        },
+        {
+            "id": 4,
+            "columnList": [
+                {
+                    "id": 10,
+                    "value": "Host Name"
+                },
+                {
+                    "id": 12,
+                    "value": "Username"
+                },
+                {
+                    "id": 26,
+                    "value": "Domain"
+                },
+                {
+                    "id": 9,
+                    "value": "Time"
+                }
+            ],
+            "columnListLength": 3,
+            "marginTop": true
+        }
+    ],
+    "anomalyType": 2,
+    "frequency": 0,
+    "seasonality": false
+}
+    {
+    "91": [
+        [
+            9,
+            26,
+            10,
+            45,
+            12
+        ],
+        [
+            9,
+            26,
+            10,
+            45,
+            12
+        ]
+    ],
+    "92": [
+        [
+            9,
+            26,
+            10,
+            45,
+            12
+        ],
+        [
+            9,
+            26,
+            10,
+            45,
+            12
+        ]
+    ],
+    "93": [
+        [
+            9,
+            26,
+            10,
+            45,
+            12
+        ],
+        [
+            9,
+            26,
+            10,
+            45,
+            12
+        ]
+    ],
+    "94": [
+        [
+            9,
+            26,
+            45,
+            12
+        ]
+    ]
+}
+}
