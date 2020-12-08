@@ -138,8 +138,10 @@
                     // for (let iindex = 0; iindex < myArr.columnTypeData.dropdownList.length; iindex++) {
                     //     columnList.push(myArr.columnTypeData.dropdownList[iindex].id);
                     // }
-                    columnList = myArr.columnTypeData.dropdownList.map(obj => obj.id);
-                    i++;
+                    columnList = myArr.columnTypeData.dropdownList.map(obj => obj.id);                
+                    
+                    
+                        i++;
                     let patternViewObject = {};
                     if (patternPresent) {
                         patternViewObject = makePatternView(patternData, reportID, retrievePatternFields(reportID, patternData));
